@@ -8,10 +8,26 @@ export type SystemCalls = ReturnType<typeof createSystemCalls>;
 
 export function createSystemCalls(
   { singletonEntity, playerEntity, worldSend, txReduced$ }: SetupNetworkResult,
-  { Player, Position }: ClientComponents
+  { MapConfig, Obstruction, Player, Position }: ClientComponents
 ) {
-  const moveTo = async (x: number, y: number) => {
+  const wrapPosition = (x: number, y: number) => {
+    const mapConfig = getComponentValue(MapConfig, singletonEntity);
+    if (!mapConfig) throw new Error("map must be initialized");
+    return [
+      (x + mapConfig.width) % mapConfig.width,
+      (y + mapConfig.height) % mapConfig.height,
+    ];
+  };
+
+  const isObstructed = (x: number, y: number) => {
+    return runQuery([Has(Obstruction), HasValue(Position, { x, y })]).size > 0;
+  };
+
+  const moveTo = async (inputX: number, inputY: number) => {
     if (!playerEntity) throw new Error("no player");
+    const [x, y] = wrapPosition(inputX, inputY);
+    if (isObstructed(x, y)) throw new Error("cannot move to obstructed space");
+
     const positionId = uuid();
     Position.addOverride(positionId, {
       entity: playerEntity,
@@ -38,8 +54,10 @@ export function createSystemCalls(
     await moveTo(playerPosition.x + deltaX, playerPosition.y + deltaY);
   };
 
-  const spawn = async (x: number, y: number) => {
+  const spawn = async (inputX: number, inputY: number) => {
     if (!playerEntity) throw new Error("no player");
+    const [x, y] = wrapPosition(inputX, inputY);
+    if (isObstructed(x, y)) throw new Error("cannot spawn on obstructed space");
 
     // const positionId = uuid();
     // Position.addOverride(positionId, {

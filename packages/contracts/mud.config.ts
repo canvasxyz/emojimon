@@ -15,6 +15,7 @@ export default mudConfig({
       },
     },
     Movable: "bool",
+    Obstruction: "bool",
     Player: "bool",
     Position: {
       dataStruct: false,

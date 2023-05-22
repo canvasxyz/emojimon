@@ -4,8 +4,9 @@ pragma solidity >=0.8.0;
 import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { MapConfig } from "../src/codegen/Tables.sol";
+import { MapConfig, Obstruction, Position } from "../src/codegen/Tables.sol";
 import { TerrainType } from "../src/codegen/Types.sol";
+import { positionToEntityKey } from "../src/positionToEntityKey.sol";
 
 contract PostDeploy is Script {
   function run(address worldAddress) external {
@@ -52,6 +53,12 @@ contract PostDeploy is Script {
         if (terrainType == TerrainType.None) continue;
 
         terrain[(y * width) + x] = bytes1(uint8(terrainType));
+
+        bytes32 entity = positionToEntityKey(x, y);
+        if (terrainType == TerrainType.Boulder) {
+            Position.set(world, entity, x, y);
+            Obstruction.set(world, entity, true);
+        }
       }
     }
 
