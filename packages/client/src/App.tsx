@@ -2,6 +2,7 @@ import { useComponentValue } from "@latticexyz/react";
 import { SyncState } from "@latticexyz/network";
 import { useMUD } from "./MUDContext";
 import { GameBoard } from "./GameBoard";
+import { EmbeddableChat } from "./EmbeddableChat";
 
 export const App = () => {
   const {
@@ -24,6 +25,7 @@ export const App = () => {
       ) : (
         <GameBoard />
       )}
+      <EmbeddableChat />
     </div>
   );
 };
