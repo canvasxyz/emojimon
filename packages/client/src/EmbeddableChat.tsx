@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useEntityQuery } from "@latticexyz/react";
 import useLocalStorageState from "use-local-storage-state";
 import TextareaAutosize from "react-autosize-textarea";
@@ -309,6 +309,20 @@ const MessageView: React.FC<MessageViewProps> = ({ i, message }) => {
 
   const from = user?.name ?? message.from.slice(0, 6);
 
+  const dateDiff = useMemo(() => {
+    var now = new Date();
+    var diffMs = now - message.timestamp;
+    var diffDays = Math.floor(diffMs / 86400000);
+    var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
+    var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+
+    if (diffMins < 1) return "now";
+    else if (diffMins < 60) return `${diffMins}m`;
+    else if (diffHrs < 24) return `${diffHrs}h`;
+    else if (diffDays < 30) return `${diffDays}d`;
+    else return "";
+  }, [message.timestamp]);
+
   return (
     <div>
       {i === 0 && (
@@ -317,13 +331,20 @@ const MessageView: React.FC<MessageViewProps> = ({ i, message }) => {
         </div>
       )}
       <div
-        className="break-words leading-snug my-1"
+        className="w-full flex leading-snug my-1"
         style={{ fontSize: "93%" }}
       >
-        <span className="text-gray-400 opacity-70 text-xs mr-1.5 overflow-wrap">
-          {from}
-        </span>
-        {message.content}
+        <div className="flex-1 break-words max-w-full overflow-x-hidden">
+          <span className="text-gray-400 opacity-70 text-xs mr-1.5 overflow-wrap">
+            {from}
+          </span>
+          {message.content}
+        </div>
+        <div className="align-right">
+          <span className="text-gray-400 opacity-70 text-xs ml-1.5 overflow-wrap text-right">
+            {dateDiff}
+          </span>
+        </div>
       </div>
     </div>
   );
