@@ -18,9 +18,11 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
 
   const { libp2p } = useLibp2p();
 
+  const { connectionCount } = useLibp2p();
+
   return (
     <EmbeddableChatWrapper
-      label={"Chat (0 online)"}
+      label={`Chat (${connectionCount} connections)`}
       labelShort={"Chat"}
       address={as}
     >
