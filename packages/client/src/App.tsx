@@ -4,10 +4,12 @@ import { useMUD } from "./MUDContext";
 import { GameBoard } from "./GameBoard";
 import { EmbeddableChat } from "./EmbeddableChat";
 
+import { Has } from "@latticexyz/recs";
+
 export const App = () => {
   const {
-    components: { LoadingState },
-    network: { singletonEntity },
+    components: { LoadingState, Player, Position },
+    network: { playerEntity, singletonEntity },
   } = useMUD();
 
   const loadingState = useComponentValue(LoadingState, singletonEntity, {
@@ -25,7 +27,10 @@ export const App = () => {
       ) : (
         <GameBoard />
       )}
-      <EmbeddableChat />
+      <EmbeddableChat
+        as={playerEntity}
+        withEntityQuery={[Has(Player), Has(Position)]}
+      />
     </div>
   );
 };
