@@ -37,11 +37,12 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   const { connectionCount, libp2p } = useLibp2p();
 
   const [signer, setSigner] = useState<ethers.Wallet>();
-  useEffect(() => {
+  const refreshSigner = () => {
     const mudBurnerWallet = localStorage.getItem("mud:burnerWallet");
     if (!mudBurnerWallet) return;
     setSigner(new ethers.Wallet(mudBurnerWallet));
-  }, []);
+  };
+  useEffect(refreshSigner, []);
 
   useEffect(() => {
     if (!scrollElementRef.current) return;
@@ -49,8 +50,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   }, [messages && messages.length !== 0]);
 
   const handleSend = useCallback(
-    async (content: string) => {
-      if (!signer) return;
+    async (content: string, signer: ethers.Wallet) => {
       setDraft("");
 
       try {
@@ -109,7 +109,8 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 setSending(true);
-                handleSend(draft)
+                if (!signer) return refreshSigner();
+                handleSend(draft, signer)
                   .then(() => {
                     e.target.value = "";
                   })
@@ -195,7 +196,7 @@ const EmbeddableChatWrapper: React.FC<{
               {labelShort} ({connectionCount} connections)
             </div>
             <div
-              className="pr-4 py-2 pl-4 cursor-pointer border-l-1 text-gray-600 hover:text-gray-200"
+              className="pr-4 py-2 pl-4 cursor-pointer border-l-1 text-gray-500 hover:text-gray-200"
               onClick={() => {
                 setOpened(false);
               }}
@@ -203,10 +204,23 @@ const EmbeddableChatWrapper: React.FC<{
               Hide (Esc)
             </div>
           </div>
+          <div className="border-b border-gray-700 flex text-sm text-gray-500">
+            {name && (
+              <div className="pl-4 py-2 flex-1">
+                Logged in as{" "}
+                <span
+                  onClick={() => setName(undefined)}
+                  className="cursor-pointer hover:text-white"
+                >
+                  {name}
+                </span>
+              </div>
+            )}
+          </div>
           <div className="px-4 py-3 h-80">
             {name === undefined ? (
               <>
-                <div className="text-center pt-10">Choose a name</div>
+                <div className="text-center pt-16">Choose a name</div>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -220,6 +234,7 @@ const EmbeddableChatWrapper: React.FC<{
                     ref={nameInputRef}
                     type="text"
                     placeholder="anonymous"
+                    autoFocus={true}
                     className="my-3 bg-gray-700 w-full outline-none border-none px-2 py-1 rounded"
                     onKeyDown={(e) => e.stopPropagation()}
                     onKeyPress={(e) => e.stopPropagation()}
@@ -227,6 +242,7 @@ const EmbeddableChatWrapper: React.FC<{
                   <input
                     type="submit"
                     value="Save"
+                    style={{ fontSize: "93%" }}
                     className="cursor-pointer w-full bg-gray-700 hover:opacity-90 px-2 py-1 rounded"
                   />
                 </form>
