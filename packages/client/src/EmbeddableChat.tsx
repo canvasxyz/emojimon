@@ -37,28 +37,30 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   const { connectionCount, libp2p } = useLibp2p();
 
   const [signer, setSigner] = useState<ethers.Wallet>();
-  useEffect(() => {
+  const refreshSigner = () => {
     const mudBurnerWallet = localStorage.getItem("mud:burnerWallet");
     if (!mudBurnerWallet) return;
     setSigner(new ethers.Wallet(mudBurnerWallet));
-  }, []);
+  };
+  useEffect(refreshSigner, []);
 
   useEffect(() => {
-    if (!scrollElementRef.current) return
+    if (!scrollElementRef.current) return;
     scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
   }, [messages && messages.length !== 0]);
 
   const handleSend = useCallback(
-    async (content: string) => {
-      if (!signer) return;
+    async (content: string, signer: ethers.Wallet) => {
       setDraft("");
 
-      const timestamp = Date.now()
+      const timestamp = Date.now();
       const message: Message = {
         from: as,
         content,
         timestamp,
-        signature: await signer.signMessage(encode({ from: as, content, timestamp })),
+        signature: await signer.signMessage(
+          encode({ from: as, content, timestamp })
+        ),
       };
       const value = encode(message);
       const key = blake3(value, { dkLen: 16 });
@@ -108,13 +110,14 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 setSending(true);
-                handleSend(draft)
+                if (!signer) return refreshSigner();
+                handleSend(draft, signer)
                   .then(() => {
                     e.target.value = "";
                   })
                   .finally(() => {
                     setSending(false);
-                    if (!scrollElementRef.current) return
+                    if (!scrollElementRef.current) return;
                     scrollElementRef.current.scrollTop =
                       scrollElementRef.current.scrollHeight;
                   });
