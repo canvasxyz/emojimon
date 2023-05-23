@@ -71,6 +71,7 @@ export async function getChatService(): Promise<
           update.user.toLowerCase() === from.toLowerCase(),
           "event signed by wrong address"
         );
+
         modelDB.names.put(update);
       } else {
         throw new Error("invalid event type");

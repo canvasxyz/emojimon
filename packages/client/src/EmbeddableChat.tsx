@@ -4,7 +4,7 @@ import useLocalStorageState from "use-local-storage-state";
 import TextareaAutosize from "react-autosize-textarea";
 import { blake3 } from "@noble/hashes/blake3";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Message, modelDB } from "./libp2p/db";
+import { Message, Update, modelDB } from "./libp2p/db";
 import { encode } from "microcbor";
 import { ethers } from "ethers";
 
@@ -77,6 +77,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
       label={`Chat (${connectionCount} connections)`}
       labelShort={"Chat"}
       address={as}
+      signer={signer}
     >
       {/* contents go here */}
       <div className="relative h-full">
@@ -84,11 +85,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
           {messages &&
             messages.map((message) => {
               const { id } = message as Message & { id?: number };
-              return (
-                <div key={id} className="">
-                  {message.from.slice(0, 4)}: {message.content}
-                </div>
-              );
+              return <MessageView key={id} message={message} />;
             })}
         </div>
 
@@ -135,10 +132,44 @@ const EmbeddableChatWrapper: React.FC<{
   label: string;
   labelShort: string;
   address: string;
-}> = ({ children, label, labelShort, address }) => {
+  signer: ethers.Wallet | undefined;
+}> = ({ children, label, labelShort, address, signer }) => {
   const [opened, setOpened] = useState(true);
-  const [names, setNames] = useState({});
-  const [name, setName] = useLocalStorageState("embeddable-chat-name");
+
+  const user = useLiveQuery(() => modelDB.names.get(address));
+
+  const handleUpdateName = useCallback(
+    async (name: string) => {
+      if (name.trim() === "") {
+        return;
+      } else if (signer === undefined) {
+        return;
+      }
+
+      try {
+        const update: Update = { user: address, name };
+        const signature = await signer.signMessage(
+          encode({ type: "update", detail: update })
+        );
+
+        console.log("got update", update);
+        console.log("got signature from", signer.address);
+
+        const value = encode({ type: "update", detail: update, signature });
+        const key = blake3(value, { dkLen: 16 });
+
+        console.log("INSERTING INTO", CHAT_TOPIC);
+        await libp2p.services[CHAT_TOPIC].insert(key, value);
+        // setName(name);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [address, signer]
+  );
+
+  // const [names, setNames] = useState({});
+  // const [name, setName] = useLocalStorageState("embeddable-chat-name");
   // TODO: sync these with the world, or with an accumulator in merkle sync
 
   useEffect(() => {
@@ -205,29 +236,26 @@ const EmbeddableChatWrapper: React.FC<{
             </div>
           </div>
           <div className="border-b border-gray-700 flex text-sm text-gray-500">
-            {name && (
+            {user && (
               <div className="pl-4 py-2 flex-1">
                 Logged in as{" "}
                 <span
-                  onClick={() => setName(undefined)}
+                  onClick={() => modelDB.names.delete(user.user)}
                   className="cursor-pointer hover:text-white"
                 >
-                  {name}
+                  {user.name}
                 </span>
               </div>
             )}
           </div>
           <div className="px-4 py-3 h-80">
-            {name === undefined ? (
+            {user === undefined ? (
               <>
                 <div className="text-center pt-16">Choose a name</div>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    const name = nameInputRef.current?.value || "";
-                    if (!name || !name.trim()) return;
-                    setName(name);
-                    setNames({ ...names, [address]: name });
+                    handleUpdateName(nameInputRef.current?.value ?? "");
                   }}
                 >
                   <input
@@ -253,6 +281,24 @@ const EmbeddableChatWrapper: React.FC<{
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+interface MessageViewProps {
+  message: Message;
+}
+
+const MessageView: React.FC<MessageViewProps> = ({ message }) => {
+  const user = useLiveQuery(
+    () => modelDB.names.get(message.from),
+    [message.from]
+  );
+  const from = user?.name ?? message.from.slice(0, 6);
+
+  return (
+    <div className="">
+      {from}: {message.content}
     </div>
   );
 };

@@ -23,16 +23,8 @@ export const Libp2pProvider: React.FC<{ children: React.ReactNode }> = (
   props
 ) => {
   const [connectionCount, setConnectionCount] = useState(0);
-  // const [peerCount, setPeerCount] = useState(0);
 
   useEffect(() => {
-    // const handlePeerConnect = ({ detail: peerId }: CustomEvent<PeerId>) => {};
-    // const handlePeerDisconnect = ({
-    //   detail: peerId,
-    // }: CustomEvent<PeerId>) => {};
-    // libp2p.addEventListener("peer:connect", handlePeerConnect);
-    // libp2p.addEventListener("peer:disconnect", handlePeerDisconnect);
-
     const handleConnectionOpen = ({
       detail: { id, remotePeer, remoteAddr },
     }: CustomEvent<Connection>) => {
