@@ -48,7 +48,7 @@ importers:
         specifier: ^0.0.8
         version: 0.0.8(@chainsafe/libp2p-gossipsub@8.0.0)
       '@chainsafe/libp2p-gossipsub':
-        specifier: ^8.0.0
+        specifier: github:joeltg/js-libp2p-gossipsub#patch-1
         version: 8.0.0
       '@chainsafe/libp2p-noise':
         specifier: ^12.0.1

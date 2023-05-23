@@ -16,7 +16,7 @@
     "@canvas-js/okra": "^0.0.1",
     "@canvas-js/okra-idb": "^0.0.2",
     "@canvas-js/pubsub-service-discovery": "^0.0.8",
-    "@chainsafe/libp2p-gossipsub": "^8.0.0",
+    "@chainsafe/libp2p-gossipsub": "github:joeltg/js-libp2p-gossipsub#patch-1",
     "@chainsafe/libp2p-noise": "^12.0.1",
     "@ethersproject/providers": "^5.7.2",
     "@latticexyz/common": "2.0.0-alpha.1.177",
