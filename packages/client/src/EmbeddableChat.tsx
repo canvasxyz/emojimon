@@ -17,7 +17,7 @@ type EmbeddableChatProps = {
 };
 
 export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
-  as,
+  as: address,
   withEntityQuery,
 }) => {
   const players: string[] = useEntityQuery(withEntityQuery);
@@ -28,19 +28,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-  }, [messages]);
-
-  // `as` is your address, `players` is all addresses who can chat
-  const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft", {
-    defaultValue: "",
-  });
-
-  const [sending, setSending] = useState<boolean>();
-  const scrollElementRef = useRef<HTMLDivElement>();
-
-  const { connectionCount, libp2p } = useLibp2p();
+  const user = useLiveQuery(() => modelDB.names.get(address));
 
   const [signer, setSigner] = useState<ethers.Wallet>();
   const refreshSigner = () => {
@@ -55,13 +43,56 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
     scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
   }, [messages && messages.length !== 0]);
 
+  const handleUpdateName = useCallback(
+    async (name: string) => {
+      if (name.trim() === "") {
+        return;
+      } else if (signer === undefined) {
+        return;
+      }
+
+      try {
+        const update: Update = { user: address, name };
+        const signature = await signer.signMessage(
+          encode({ type: "update", detail: update })
+        );
+
+        console.log("got update", update);
+        console.log("got signature from", signer.address);
+
+        const value = encode({ type: "update", detail: update, signature });
+        const key = blake3(value, { dkLen: 16 });
+
+        console.log("INSERTING INTO", CHAT_TOPIC);
+        await libp2p.services[CHAT_TOPIC].insert(key, value);
+        // setName(name);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [address, signer]
+  );
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+  }, [messages, user?.name]);
+
+  const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft", {
+    defaultValue: "",
+  });
+
+  const [sending, setSending] = useState<boolean>();
+  const scrollElementRef = useRef<HTMLDivElement>();
+
+  const { connectionCount, libp2p } = useLibp2p();
+
   const handleSend = useCallback(
     async (content: string, signer: ethers.Wallet) => {
       setDraft("");
 
       try {
         const timestamp = Date.now();
-        const message: Message = { from: as, content, timestamp };
+        const message: Message = { from: address, content, timestamp };
         const signature = await signer.signMessage(
           encode({ type: "message", detail: message })
         );
@@ -75,15 +106,16 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
         console.error(err);
       }
     },
-    [libp2p, as]
+    [libp2p, address]
   );
 
   return (
     <EmbeddableChatWrapper
       label={`Chat (${connectionCount} connections)`}
       labelShort={"Chat"}
-      address={as}
       signer={signer}
+      user={user}
+      handleUpdateName={handleUpdateName}
     >
       {/* contents go here */}
       <div className="relative h-full">
@@ -144,46 +176,11 @@ const EmbeddableChatWrapper: React.FC<{
   children: JSX.Element | JSX.Element[];
   label: string;
   labelShort: string;
-  address: string;
   signer: ethers.Wallet | undefined;
-}> = ({ children, label, labelShort, address, signer }) => {
+  handleUpdateName: (name: string) => Promise;
+  user;
+}> = ({ children, label, labelShort, signer, handleUpdateName, user }) => {
   const [opened, setOpened] = useState(true);
-
-  const user = useLiveQuery(() => modelDB.names.get(address));
-
-  const handleUpdateName = useCallback(
-    async (name: string) => {
-      if (name.trim() === "") {
-        return;
-      } else if (signer === undefined) {
-        return;
-      }
-
-      try {
-        const update: Update = { user: address, name };
-        const signature = await signer.signMessage(
-          encode({ type: "update", detail: update })
-        );
-
-        console.log("got update", update);
-        console.log("got signature from", signer.address);
-
-        const value = encode({ type: "update", detail: update, signature });
-        const key = blake3(value, { dkLen: 16 });
-
-        console.log("INSERTING INTO", CHAT_TOPIC);
-        await libp2p.services[CHAT_TOPIC].insert(key, value);
-        // setName(name);
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    [address, signer]
-  );
-
-  // const [names, setNames] = useState({});
-  // const [name, setName] = useLocalStorageState("embeddable-chat-name");
-  // TODO: sync these with the world, or with an accumulator in merkle sync
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
