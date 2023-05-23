@@ -319,8 +319,11 @@ const MessageView: React.FC<MessageViewProps> = ({ i, message }) => {
           {new Date(message.timestamp).toLocaleString()}
         </div>
       )}
-      <div className="" style={{ fontSize: "93%" }}>
-        <span className="text-gray-400 opacity-70 text-xs mr-1.5 overflow-wrap break-words">
+      <div
+        className="break-words leading-snug my-1"
+        style={{ fontSize: "93%" }}
+      >
+        <span className="text-gray-400 opacity-70 text-xs mr-1.5 overflow-wrap">
           {from}
         </span>
         {message.content}
