@@ -32,6 +32,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   });
 
   const [sending, setSending] = useState();
+  const scrollElementRef = useRef();
 
   const { connectionCount, libp2p } = useLibp2p();
 
@@ -43,15 +44,16 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   }, []);
 
   const handleSend = useCallback(
-    (content: string) => {
+    async (content: string) => {
       setDraft("");
 
       const message: Message = { from: as, content, timestamp: Date.now() };
       const value = encode(message);
       const key = blake3(value, { dkLen: 16 });
 
-      libp2p.services[CHAT_TOPIC].insert(key, value).catch((err) => {
+      return libp2p.services[CHAT_TOPIC].insert(key, value).catch((err) => {
         console.error(err);
+        throw err;
       });
     },
     [libp2p, as]
@@ -65,19 +67,22 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
     >
       {/* contents go here */}
       <div className="relative h-full">
-        {messages &&
-          messages.map((message) => {
-            const { id } = message as Message & { id?: number };
-            return (
-              <div key={id} className="">
-                {message.content}
-              </div>
-            );
-          })}
+        <div className="overflow-auto max-h-64 pb-2" ref={scrollElementRef}>
+          {messages &&
+            messages.map((message) => {
+              const { id } = message as Message & { id?: number };
+              return (
+                <div key={id} className="">
+                  {message.content}
+                </div>
+              );
+            })}
+        </div>
 
         <div className="absolute bottom-0 w-full">
           <TextareaAutosize
             autoFocus={true}
+            readOnly={sending}
             placeholder="New message"
             className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1 rounded max-h-16"
             defaultValue={draft}
@@ -87,8 +92,16 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
               if (e.key === "Enter" && !e.shiftKey) {
                 e.stopPropagation();
                 e.preventDefault();
-                // send
-                handleSend(draft);
+                setSending(true);
+                handleSend(draft)
+                  .then(() => {
+                    e.target.value = "";
+                  })
+                  .finally((err) => {
+                    setSending(false);
+                    scrollElementRef.current.scrollTop =
+                      scrollElementRef.current.scrollHeight;
+                  });
               }
             }}
           />
