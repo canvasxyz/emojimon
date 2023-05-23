@@ -2,16 +2,21 @@ import { useEffect, useState, useRef } from "react";
 import { useEntityQuery } from "@latticexyz/react";
 import useLocalStorageState from "use-local-storage-state";
 import TextareaAutosize from "react-autosize-textarea";
+
 import { useLibp2p } from "./libp2p";
+import { CHAT_TOPIC } from "./libp2p/constants";
 
 export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   as,
   withEntityQuery,
 }) => {
-  const newMessageInputRef = useRef();
   const players: string[] = useEntityQuery(withEntityQuery);
   // `as` is your address, `players` is all addresses who can chat
-  const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft");
+  const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft", {
+    defaultValue: "",
+  });
+
+  const { libp2p } = useLibp2p();
 
   return (
     <EmbeddableChatWrapper
@@ -26,25 +31,19 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
         <div className="">Bob: hi alice</div>
         <div className="absolute bottom-0 w-full">
           <TextareaAutosize
-            ref={newMessageInputRef}
             placeholder="New message"
             className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1 rounded max-h-16"
             defaultValue={draft}
-            onKeyDown={(e) => {
-              if (e.key !== "Escape") e.stopPropagation();
-              // catch non-printing characters like backspace
-              setDraft(newMessageInputRef.current.value);
-            }}
+            // @ts-expect-error
+            onChange={(e) => setDraft(e.target.value)}
             onKeyPress={(e) => {
-              e.stopPropagation();
               if (e.key === "Enter" && !e.shiftKey) {
-                // send
+                e.stopPropagation();
                 e.preventDefault();
-                newMessageInputRef.current.value = "";
+                // send
                 setDraft("");
-              } else {
-                console.log(newMessageInputRef.current.value);
-                setDraft(newMessageInputRef.current.value);
+                // libp2p.services[CHAT_TOPIC].insert()
+                // console.log({ draft });
               }
             }}
           />

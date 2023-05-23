@@ -5,7 +5,7 @@ import { PeerId } from "@libp2p/interface-peer-id";
 import { Connection } from "@libp2p/interface-connection";
 import { identifyService } from "libp2p/identify";
 
-import { libp2p } from "./index.js";
+import { libp2p, ServiceMap } from "./libp2p.js";
 
 interface Libp2pContext {
   connectionCount: number;
@@ -13,7 +13,10 @@ interface Libp2pContext {
 
 const Libp2pContext = createContext<Libp2pContext>({ connectionCount: 0 });
 
-export function useLibp2p(): { libp2p: Libp2p; connectionCount: number } {
+export function useLibp2p(): {
+  libp2p: Libp2p<ServiceMap>;
+  connectionCount: number;
+} {
   const { connectionCount } = useContext(Libp2pContext);
   return { libp2p, connectionCount };
 }
