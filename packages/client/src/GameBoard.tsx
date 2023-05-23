@@ -1,12 +1,11 @@
 import { useEffect } from "react";
-import { useComponentValue, useEntityQuery } from "@latticexyz/react";
-import { toEthAddress } from "@latticexyz/utils";
 import { GameMap } from "./GameMap";
 import { useMUD } from "./MUDContext";
 import { useKeyboardMovement } from "./useKeyboardMovement";
 import { EncounterScreen } from "./EncounterScreen";
+import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { Entity, Has, getComponentValueStrict } from "@latticexyz/recs";
-import { hexToArray } from "@latticexyz/utils";
+import { hexToArray, toEthAddress } from "@latticexyz/utils";
 import { MonsterType, monsterTypes } from "./monsterTypes";
 import { TerrainType, terrainTypes } from "./terrainTypes";
 
@@ -54,7 +53,7 @@ export const GameBoard = () => {
   }
 
   const { width, height, terrain: terrainData } = mapConfig;
-  const terrain = Array.from(hexToArray(terrainData)).map((value, index) => {
+  const terrain = Array.from(hexToArray(terrainData)).map((value, index: number) => {
     const { emoji } =
       value in TerrainType ? terrainTypes[value as TerrainType] : { emoji: "" };
     return {
