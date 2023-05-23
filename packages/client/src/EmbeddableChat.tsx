@@ -5,6 +5,12 @@ import TextareaAutosize from "react-autosize-textarea";
 
 import { useLibp2p } from "./libp2p";
 import { CHAT_TOPIC } from "./libp2p/constants";
+import { ethers } from "ethers";
+
+type EmbeddableChatProps = {
+  as: string,
+  withEntityQuery: unknown
+}
 
 export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   as,
@@ -15,10 +21,16 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft", {
     defaultValue: "",
   });
-
-  const { libp2p } = useLibp2p();
+  const [sending, setSending] = useState();
 
   const { connectionCount } = useLibp2p();
+
+  const [signer, setSigner] = useState<ethers.Wallet>();
+  useEffect(() => {
+    const mudBurnerWallet = localStorage.getItem("mud:burnerWallet");
+    if (!mudBurnerWallet) return;
+    setSigner(new ethers.Wallet(mudBurnerWallet));
+  }, []);
 
   return (
     <EmbeddableChatWrapper
@@ -33,6 +45,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
         <div className="">Bob: hi alice</div>
         <div className="absolute bottom-0 w-full">
           <TextareaAutosize
+            autoFocus={true}
             placeholder="New message"
             className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1 rounded max-h-16"
             defaultValue={draft}
@@ -77,9 +90,9 @@ const EmbeddableChatWrapper: React.FC<{
     return () => window.removeEventListener("keydown", listener);
   });
 
-  const { connectionCount } = useLibp2p();
+  const { libp2p, connectionCount } = useLibp2p();
 
-  const nameInputRef = useRef();
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div
@@ -110,9 +123,9 @@ const EmbeddableChatWrapper: React.FC<{
         <div
           style={{
             position: "absolute",
-            top: 18,
+            top: 0,
             right: 20,
-            borderRadius: 4,
+            borderRadius: "0 0 4px 4px",
             height: "auto",
           }}
           className="w-64 bg-gray-800"
@@ -137,7 +150,7 @@ const EmbeddableChatWrapper: React.FC<{
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    const name = nameInputRef.current.value;
+                    const name = nameInputRef.current?.value || '';
                     if (!name || !name.trim()) return;
                     setName(name);
                     setNames({ ...names, [address]: name });
