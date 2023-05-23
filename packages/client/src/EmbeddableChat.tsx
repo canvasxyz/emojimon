@@ -30,9 +30,10 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft", {
     defaultValue: "",
   });
+
   const [sending, setSending] = useState();
 
-  const { connectionCount } = useLibp2p();
+  const { connectionCount, libp2p } = useLibp2p();
 
   const [signer, setSigner] = useState<ethers.Wallet>();
   useEffect(() => {
@@ -42,15 +43,16 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   }, []);
 
   const handleSend = useCallback(
-    async (content: string) => {
+    (content: string) => {
+      setDraft("");
+
       const message: Message = { from: as, content, timestamp: Date.now() };
       const value = encode(message);
       const key = blake3(value, { dkLen: 16 });
-      try {
-        await libp2p.services[CHAT_TOPIC].insert(key, value);
-      } catch (err) {
+
+      libp2p.services[CHAT_TOPIC].insert(key, value).catch((err) => {
         console.error(err);
-      }
+      });
     },
     [libp2p, as]
   );
@@ -87,7 +89,6 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
                 e.preventDefault();
                 // send
                 handleSend(draft);
-                setDraft("");
               }
             }}
           />
