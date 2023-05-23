@@ -11,8 +11,8 @@ export class ModelDB extends Dexie {
   names!: Table<{ user: string; name: string }, string>;
 
   constructor() {
-    super("ModelDB");
-    this.version(2).stores({
+    super(`${CHAT_TOPIC}/models`);
+    this.version(1).stores({
       messages: "++id, from, timestamp",
       names: "user",
     });
@@ -21,7 +21,7 @@ export class ModelDB extends Dexie {
 
 export const modelDB = new ModelDB();
 
-export const storeDB = await openDB("canvas:emojimon", 3, {
+export const storeDB = await openDB(`${CHAT_TOPIC}/events`, 1, {
   upgrade(database, oldVersion, newVersion, transaction, event) {
     console.log(
       `upgrading IndexedDB database from ${oldVersion} to ${newVersion}`
