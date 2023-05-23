@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useEntityQuery } from "@latticexyz/react";
 import useLocalStorageState from "use-local-storage-state";
 import TextareaAutosize from "react-autosize-textarea";
+import { useLibp2p } from "./libp2p";
 
 export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   as,
@@ -75,6 +76,8 @@ const EmbeddableChatWrapper: React.FC<{
     return () => window.removeEventListener("keydown", listener);
   });
 
+  const { connectionCount } = useLibp2p();
+
   const nameInputRef = useRef();
 
   return (
@@ -114,7 +117,9 @@ const EmbeddableChatWrapper: React.FC<{
           className="w-64 bg-gray-800"
         >
           <div className="border-b border-gray-700 flex text-sm">
-            <div className="pl-4 py-2 flex-1">{labelShort}</div>
+            <div className="pl-4 py-2 flex-1">
+              {labelShort} ({connectionCount} connections)
+            </div>
             <div
               className="pr-4 py-2 pl-4 cursor-pointer border-l-1 text-gray-600 hover:text-gray-200"
               onClick={() => {
