@@ -8,7 +8,7 @@ export type SystemCalls = ReturnType<typeof createSystemCalls>;
 
 export function createSystemCalls(
   { singletonEntity, playerEntity, worldSend, txReduced$ }: SetupNetworkResult,
-  { MapConfig, Obstruction, Player, Position }: ClientComponents
+  { Encounter, MapConfig, Obstruction, Player, Position }: ClientComponents
 ) {
   const wrapPosition = (x: number, y: number) => {
     const mapConfig = getComponentValue(MapConfig, singletonEntity);
@@ -25,6 +25,8 @@ export function createSystemCalls(
 
   const moveTo = async (inputX: number, inputY: number) => {
     if (!playerEntity) throw new Error("no player");
+    if (!!getComponentValue(Encounter, playerEntity))
+      throw new Error("cannot move during encounter");
     const [x, y] = wrapPosition(inputX, inputY);
     if (isObstructed(x, y)) throw new Error("cannot move to obstructed space");
 
@@ -90,8 +92,8 @@ export function createSystemCalls(
   };
 
   const fleeEncounter = async () => {
-    // TODO
-    return null as any;
+    const tx = await worldSend("flee", []);
+    await awaitStreamValue(txReduced$, (txHash) => txHash === tx.hash);
   };
 
   return {
