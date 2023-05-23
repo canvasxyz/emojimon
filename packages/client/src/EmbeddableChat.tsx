@@ -81,11 +81,15 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
     >
       {/* contents go here */}
       <div className="relative h-full">
-        <div className="overflow-auto max-h-64 pb-2" ref={scrollElementRef}>
+        <div
+          className="overflow-auto pt-1 pb-1"
+          style={{ maxHeight: "16.6rem" }}
+          ref={scrollElementRef}
+        >
           {messages &&
-            messages.map((message) => {
+            messages.map((message, i) => {
               const { id } = message as Message & { id?: number };
-              return <MessageView key={id} message={message} />;
+              return <MessageView key={id} i={i} message={message} />;
             })}
         </div>
 
@@ -94,7 +98,8 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
             autoFocus={true}
             readOnly={sending}
             placeholder="New message"
-            className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1 rounded max-h-16"
+            className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1.5 rounded max-h-16 leading-tight"
+            style={{ fontSize: "93%" }}
             defaultValue={draft}
             // @ts-expect-error
             onChange={(e) => setDraft(e.target.value)}
@@ -200,7 +205,7 @@ const EmbeddableChatWrapper: React.FC<{
           style={{
             position: "relative",
             right: 20,
-            width: 160,
+            width: 180,
             borderRadius: "0 0 4px 4px",
             textAlign: "center",
             cursor: "pointer",
@@ -219,8 +224,9 @@ const EmbeddableChatWrapper: React.FC<{
             right: 20,
             borderRadius: "0 0 4px 4px",
             height: "auto",
+            width: "17rem",
           }}
-          className="w-64 bg-gray-800"
+          className="bg-gray-800"
         >
           <div className="border-b border-gray-700 flex text-sm">
             <div className="pl-4 py-2 flex-1">
@@ -248,7 +254,7 @@ const EmbeddableChatWrapper: React.FC<{
               </div>
             )}
           </div>
-          <div className="px-4 py-3 h-80">
+          <div className="px-4 pt-0 pb-2.5 h-80">
             {user === undefined ? (
               <>
                 <div className="text-center pt-16">Choose a name</div>
@@ -286,19 +292,31 @@ const EmbeddableChatWrapper: React.FC<{
 };
 
 interface MessageViewProps {
+  i: number;
   message: Message;
 }
 
-const MessageView: React.FC<MessageViewProps> = ({ message }) => {
+const MessageView: React.FC<MessageViewProps> = ({ i, message }) => {
   const user = useLiveQuery(
     () => modelDB.names.get(message.from),
     [message.from]
   );
+
   const from = user?.name ?? message.from.slice(0, 6);
 
   return (
-    <div className="">
-      {from}: {message.content}
+    <div>
+      {i === 0 && (
+        <div className="text-center text-gray-400 opacity-80 text-xs mt-2 mb-2.5">
+          {new Date(message.timestamp).toLocaleString()}
+        </div>
+      )}
+      <div className="" style={{ fontSize: "93%" }}>
+        <span className="text-gray-400 opacity-70 text-xs mr-1.5 overflow-wrap break-words">
+          {from}
+        </span>
+        {message.content}
+      </div>
     </div>
   );
 };
