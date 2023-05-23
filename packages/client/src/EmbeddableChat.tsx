@@ -81,12 +81,16 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
     >
       {/* contents go here */}
       <div className="relative h-full">
-        <div className="overflow-auto max-h-64 pb-2" ref={scrollElementRef}>
+        <div
+          className="overflow-auto pb-1"
+          style={{ maxHeight: "16.6rem" }}
+          ref={scrollElementRef}
+        >
           {messages &&
             messages.map((message) => {
               const { id } = message as Message & { id?: number };
               return (
-                <div key={id} className="">
+                <div key={id} className="" style={{ fontSize: "93%" }}>
                   {message.from.slice(0, 4)}: {message.content}
                 </div>
               );
@@ -98,7 +102,8 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
             autoFocus={true}
             readOnly={sending}
             placeholder="New message"
-            className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1 rounded max-h-16"
+            className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1.5 rounded max-h-16 leading-tight"
+            style={{ fontSize: "93%" }}
             defaultValue={draft}
             // @ts-expect-error
             onChange={(e) => setDraft(e.target.value)}
@@ -218,7 +223,7 @@ const EmbeddableChatWrapper: React.FC<{
               </div>
             )}
           </div>
-          <div className="px-4 py-3 h-80">
+          <div className="px-4 pt-0 pb-2.5 h-80">
             {name === undefined ? (
               <>
                 <div className="text-center pt-16">Choose a name</div>
