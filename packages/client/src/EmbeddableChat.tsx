@@ -26,6 +26,12 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
     []
   );
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+  }, [messages]);
+
   // `as` is your address, `players` is all addresses who can chat
   const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft", {
     defaultValue: "",
@@ -91,6 +97,8 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
               const { id } = message as Message & { id?: number };
               return <MessageView key={id} i={i} message={message} />;
             })}
+
+          <div ref={messagesEndRef} />
         </div>
 
         <div className="absolute bottom-0 w-full">
