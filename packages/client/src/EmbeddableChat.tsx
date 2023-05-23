@@ -82,16 +82,26 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
       {/* contents go here */}
       <div className="relative h-full">
         <div
-          className="overflow-auto pb-1"
+          className="overflow-auto pt-1 pb-1"
           style={{ maxHeight: "16.6rem" }}
           ref={scrollElementRef}
         >
           {messages &&
-            messages.map((message) => {
+            messages.map((message, i) => {
               const { id } = message as Message & { id?: number };
               return (
-                <div key={id} className="" style={{ fontSize: "93%" }}>
-                  {message.from.slice(0, 4)}: {message.content}
+                <div key={id}>
+                  {i === 0 && (
+                    <div className="text-center text-gray-400 opacity-80 text-xs mt-2 mb-2.5">
+                      {new Date(message.timestamp).toLocaleString()}
+                    </div>
+                  )}
+                  <div key={id} className="" style={{ fontSize: "93%" }}>
+                    <span className="text-gray-400 opacity-70 text-xs mr-1.5 overflow-wrap break-words">
+                      {message.from.slice(0, 4)}
+                    </span>
+                    {message.content}
+                  </div>
                 </div>
               );
             })}
@@ -175,7 +185,7 @@ const EmbeddableChatWrapper: React.FC<{
           style={{
             position: "relative",
             right: 20,
-            width: 160,
+            width: 180,
             borderRadius: "0 0 4px 4px",
             textAlign: "center",
             cursor: "pointer",
@@ -194,8 +204,9 @@ const EmbeddableChatWrapper: React.FC<{
             right: 20,
             borderRadius: "0 0 4px 4px",
             height: "auto",
+            width: "17rem",
           }}
-          className="w-64 bg-gray-800"
+          className="bg-gray-800"
         >
           <div className="border-b border-gray-700 flex text-sm">
             <div className="pl-4 py-2 flex-1">
