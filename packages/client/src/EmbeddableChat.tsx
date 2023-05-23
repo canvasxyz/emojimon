@@ -44,7 +44,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!scrollElementRef.current) return
+    if (!scrollElementRef.current) return;
     scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
   }, [messages && messages.length !== 0]);
 
@@ -53,20 +53,21 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
       if (!signer) return;
       setDraft("");
 
-      const timestamp = Date.now()
-      const message: Message = {
-        from: as,
-        content,
-        timestamp,
-        signature: await signer.signMessage(encode({ from: as, content, timestamp })),
-      };
-      const value = encode(message);
-      const key = blake3(value, { dkLen: 16 });
+      try {
+        const timestamp = Date.now();
+        const message: Message = { from: as, content, timestamp };
+        const signature = await signer.signMessage(
+          encode({ type: "message", detail: message })
+        );
 
-      return libp2p.services[CHAT_TOPIC].insert(key, value).catch((err) => {
+        const value = encode({ type: "message", detail: message, signature });
+        const key = blake3(value, { dkLen: 16 });
+
+        console.log("INSERTING INTO", CHAT_TOPIC);
+        await libp2p.services[CHAT_TOPIC].insert(key, value);
+      } catch (err) {
         console.error(err);
-        throw err;
-      });
+      }
     },
     [libp2p, as]
   );
@@ -114,7 +115,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
                   })
                   .finally(() => {
                     setSending(false);
-                    if (!scrollElementRef.current) return
+                    if (!scrollElementRef.current) return;
                     scrollElementRef.current.scrollTop =
                       scrollElementRef.current.scrollHeight;
                   });

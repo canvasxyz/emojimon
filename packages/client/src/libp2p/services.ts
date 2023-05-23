@@ -13,8 +13,22 @@ import {
 } from "@canvas-js/libp2p-okra-service/store/browser";
 
 import { CHAT_TOPIC } from "./constants";
-import { storeDB, modelDB, Message } from "./db";
+import { storeDB, modelDB, Message, Update } from "./db";
+
 import { assert } from "./utils";
+
+export type ChatEvents = {
+  message: Message;
+  update: Update;
+};
+
+export type SignedEvent = {
+  [T in keyof ChatEvents]: {
+    type: T;
+    signature: string;
+    detail: ChatEvents[T];
+  };
+}[keyof ChatEvents];
 
 export async function getChatService(): Promise<
   (components: StoreComponents) => StoreService
@@ -23,31 +37,44 @@ export async function getChatService(): Promise<
   return storeService(tree, {
     topic: CHAT_TOPIC,
     apply: async (key, value) => {
-      assert(equals(blake3(value, { dkLen: 16 }), key), "invalid entry");
-      const { from, content, timestamp, signature } = decode(value) as Message;
-      assert(typeof from === "string", "invalid entry: missing message.from");
-      assert(
-        typeof content === "string",
-        "invalid entry: missing message.content"
-      );
-      assert(
-        typeof timestamp === "number",
-        "invalid entry: missing message.timestamp"
-      );
-      assert(
-        typeof signature === "string",
-        "invalid entry: missing message.signature"
-      );
-
-      const valid = true;
-      console.log(signature);
-      assert(valid, "invalid signature");
-
-      modelDB.messages.add({ from, content, timestamp });
       console.log(`${CHAT_TOPIC}: got entry`, {
         key: bytesToHex(key),
         value: bytesToHex(value),
       });
+
+      assert(equals(blake3(value, { dkLen: 16 }), key), "invalid event");
+
+      const { signature, ...event } = decode(value) as SignedEvent;
+      const from = ethers.utils.verifyMessage(encode(event), signature);
+
+      console.log("applying event", event, "from address", from);
+
+      if (event.type === "message") {
+        const message = event.detail;
+        assert(
+          message.from.toLowerCase() === from.toLowerCase(),
+          "event signed by wrong address"
+        );
+        assert(
+          typeof message.content === "string",
+          "invalid event: missing message.content"
+        );
+        assert(
+          typeof message.timestamp === "number",
+          "invalid event: missing message.timestamp"
+        );
+
+        modelDB.messages.add(message);
+      } else if (event.type === "update") {
+        const update = event.detail;
+        assert(
+          update.user.toLowerCase() === from.toLowerCase(),
+          "event signed by wrong address"
+        );
+        modelDB.names.put(update);
+      } else {
+        throw new Error("invalid event type");
+      }
     },
   });
 }
