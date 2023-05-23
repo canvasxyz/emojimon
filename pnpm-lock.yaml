@@ -45,11 +45,11 @@ importers:
         specifier: ^0.0.2
         version: 0.0.2(idb@7.1.1)
       '@canvas-js/pubsub-service-discovery':
-        specifier: ^0.0.8
-        version: 0.0.8(@chainsafe/libp2p-gossipsub@8.0.0)
+        specifier: ^0.0.9
+        version: 0.0.9(@chainsafe/libp2p-gossipsub@8.0.0)
       '@chainsafe/libp2p-gossipsub':
         specifier: github:joeltg/js-libp2p-gossipsub#patch-1
-        version: 8.0.0
+        version: github.com/joeltg/js-libp2p-gossipsub/254299f67e36124b6bb5d5ce5039d05ca3619739
       '@chainsafe/libp2p-noise':
         specifier: ^12.0.1
         version: 12.0.1
@@ -594,12 +594,12 @@ packages:
       - supports-color
     dev: false
 
-  /@canvas-js/pubsub-service-discovery@0.0.8(@chainsafe/libp2p-gossipsub@8.0.0):
-    resolution: {integrity: sha512-4+OujNZkSY+BzK19UqXe4Wh6xUoVCqUTVoApFuY49F61VHHJ/lArvp0Qum6XTMYTM0X/kk/uHzW69DstlYC9vg==}
+  /@canvas-js/pubsub-service-discovery@0.0.9(@chainsafe/libp2p-gossipsub@8.0.0):
+    resolution: {integrity: sha512-UxAxsVoOL5/tpG96DhWtS2lTKVqYFKnYvknuthWBhOEvEWKhMDbBPnmhtCfwE4DBNTwxNCTTy+P4FtAF7qIjkA==}
     peerDependencies:
       '@chainsafe/libp2p-gossipsub': ^8.0.0
     dependencies:
-      '@chainsafe/libp2p-gossipsub': 8.0.0
+      '@chainsafe/libp2p-gossipsub': github.com/joeltg/js-libp2p-gossipsub/254299f67e36124b6bb5d5ce5039d05ca3619739
       '@libp2p/interface-address-manager': 3.0.1
       '@libp2p/interface-connection': 5.1.0
       '@libp2p/interface-connection-manager': 3.0.1
@@ -627,38 +627,6 @@ packages:
 
   /@chainsafe/is-ip@2.0.1:
     resolution: {integrity: sha512-nqSJ8u2a1Rv9FYbyI8qpDhTYujaKEyLknNrTejLYoSWmdeg+2WB7R6BZqPZYfrJzDxVi3rl6ZQuoaEvpKRZWgQ==}
-    dev: false
-
-  /@chainsafe/libp2p-gossipsub@8.0.0:
-    resolution: {integrity: sha512-0cnjE2ND0T6VeqIlzBghmR8aalssQUNF3RtGzrI31VWNF1D8RSayyg32A8PHRUiNKxpl+CMm9xwk9NkBRf3J4g==}
-    engines: {npm: '>=8.7.0'}
-    dependencies:
-      '@libp2p/crypto': 1.0.17
-      '@libp2p/interface-connection': 5.1.0
-      '@libp2p/interface-connection-manager': 3.0.1
-      '@libp2p/interface-keys': 1.0.8
-      '@libp2p/interface-peer-id': 2.0.2
-      '@libp2p/interface-peer-store': 2.0.3
-      '@libp2p/interface-pubsub': 4.0.1
-      '@libp2p/interface-registrar': 2.0.12
-      '@libp2p/interfaces': 3.3.2
-      '@libp2p/logger': 2.0.7
-      '@libp2p/peer-id': 2.0.3
-      '@libp2p/peer-record': 5.0.3
-      '@libp2p/pubsub': 7.0.1
-      '@libp2p/topology': 4.0.1
-      '@multiformats/multiaddr': 12.1.3
-      abortable-iterator: 5.0.1
-      denque: 1.5.1
-      it-length-prefixed: 9.0.1
-      it-pipe: 3.0.1
-      it-pushable: 3.1.3
-      multiformats: 11.0.2
-      protobufjs: 6.11.3
-      uint8arraylist: 2.4.3
-      uint8arrays: 4.0.3
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /@chainsafe/libp2p-noise@12.0.1:
@@ -7299,6 +7267,42 @@ packages:
     name: forge-std
     version: 1.2.0
     dev: true
+
+  github.com/joeltg/js-libp2p-gossipsub/254299f67e36124b6bb5d5ce5039d05ca3619739:
+    resolution: {tarball: https://codeload.github.com/joeltg/js-libp2p-gossipsub/tar.gz/254299f67e36124b6bb5d5ce5039d05ca3619739}
+    name: '@chainsafe/libp2p-gossipsub'
+    version: 8.0.0
+    engines: {npm: '>=8.7.0'}
+    prepare: true
+    requiresBuild: true
+    dependencies:
+      '@libp2p/crypto': 1.0.17
+      '@libp2p/interface-connection': 5.1.0
+      '@libp2p/interface-connection-manager': 3.0.1
+      '@libp2p/interface-keys': 1.0.8
+      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-store': 2.0.3
+      '@libp2p/interface-pubsub': 4.0.1
+      '@libp2p/interface-registrar': 2.0.12
+      '@libp2p/interfaces': 3.3.2
+      '@libp2p/logger': 2.0.7
+      '@libp2p/peer-id': 2.0.3
+      '@libp2p/peer-record': 5.0.3
+      '@libp2p/pubsub': 7.0.1
+      '@libp2p/topology': 4.0.1
+      '@multiformats/multiaddr': 12.1.3
+      abortable-iterator: 5.0.1
+      denque: 1.5.1
+      it-length-prefixed: 9.0.1
+      it-pipe: 3.0.1
+      it-pushable: 3.1.3
+      multiformats: 11.0.2
+      protobufjs: 6.11.3
+      uint8arraylist: 2.4.3
+      uint8arrays: 4.0.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   github.com/transmissions11/solmate/9cf1428245074e39090dceacb0c28b1f684f584c:
     resolution: {tarball: https://codeload.github.com/transmissions11/solmate/tar.gz/9cf1428245074e39090dceacb0c28b1f684f584c}
