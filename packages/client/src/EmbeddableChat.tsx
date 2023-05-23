@@ -1,12 +1,16 @@
 import { useEffect, useState, useRef } from "react";
 import { useEntityQuery } from "@latticexyz/react";
+import useLocalStorageState from "use-local-storage-state";
+import TextareaAutosize from "react-autosize-textarea";
 
 export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   as,
   withEntityQuery,
 }) => {
+  const newMessageInputRef = useRef();
   const players: string[] = useEntityQuery(withEntityQuery);
   // `as` is your address, `players` is all addresses who can chat
+  const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft");
 
   return (
     <EmbeddableChatWrapper
@@ -15,8 +19,38 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
       address={as}
     >
       {/* contents go here */}
-      <div className="">Alice: hello world</div>
-      <div className="">Bob: hi alice</div>
+      <div className="relative h-full">
+        <div className="">Alice: hello world</div>
+        <div className="">Bob: hi alice</div>
+        <div className="">Bob: hi alice</div>
+        <div className="absolute bottom-0 w-full">
+          <TextareaAutosize
+            ref={newMessageInputRef}
+            placeholder="New message"
+            className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1 rounded max-h-16"
+            onKeyDown={(e) => {
+              if (e.key !== "Escape") e.stopPropagation();
+            }}
+            defaultValue={draft}
+            onKeyDown={(e) => {
+              // catch non-printing characters like backspace
+              setDraft(newMessageInputRef.current.value);
+            }}
+            onKeyPress={(e) => {
+              e.stopPropagation();
+              if (e.key === "Enter" && !e.shiftKey) {
+                // send
+                e.preventDefault();
+                newMessageInputRef.current.value = "";
+                setDraft("");
+              } else {
+                console.log(newMessageInputRef.current.value);
+                setDraft(newMessageInputRef.current.value);
+              }
+            }}
+          />
+        </div>
+      </div>
     </EmbeddableChatWrapper>
   );
 };
@@ -29,8 +63,9 @@ const EmbeddableChatWrapper: React.FC<{
   address: string;
 }> = ({ children, label, labelShort, address }) => {
   const [opened, setOpened] = useState(true);
-  const [name, setName] = useState(); // TODO: sync with world
   const [names, setNames] = useState({});
+  const [name, setName] = useLocalStorageState("embeddable-chat-name");
+  // TODO: sync these with the world, or with an accumulator in merkle sync
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
@@ -100,7 +135,6 @@ const EmbeddableChatWrapper: React.FC<{
                     e.preventDefault();
                     const name = nameInputRef.current.value;
                     if (!name || !name.trim()) return;
-                    // TODO: submit p2p msg with name, or call worldSend
                     setName(name);
                     setNames({ ...names, [address]: name });
                   }}
@@ -108,7 +142,7 @@ const EmbeddableChatWrapper: React.FC<{
                   <input
                     ref={nameInputRef}
                     type="text"
-                    placeholder="anon007"
+                    placeholder="anonymous"
                     className="my-3 bg-gray-700 w-full outline-none border-none px-2 py-1 rounded"
                     onKeyDown={(e) => e.stopPropagation()}
                     onKeyPress={(e) => e.stopPropagation()}
