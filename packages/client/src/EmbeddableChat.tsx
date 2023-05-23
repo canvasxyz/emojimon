@@ -1,22 +1,51 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useEntityQuery } from "@latticexyz/react";
 import useLocalStorageState from "use-local-storage-state";
 import TextareaAutosize from "react-autosize-textarea";
+import { blake3 } from "@noble/hashes/blake3";
+import { useLiveQuery } from "dexie-react-hooks";
+
+import { encode } from "microcbor";
 
 import { useLibp2p } from "./libp2p";
 import { CHAT_TOPIC } from "./libp2p/constants";
+import { Message, modelDB } from "./libp2p/db";
+
+interface EmbeddableChatProps {
+  as: string;
+  withEntityQuery: any[];
+}
 
 export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   as,
   withEntityQuery,
 }) => {
   const players: string[] = useEntityQuery(withEntityQuery);
+  const messages = useLiveQuery(
+    () => modelDB.messages.limit(100).sortBy("timestamp"),
+    []
+  );
+
   // `as` is your address, `players` is all addresses who can chat
   const [draft, setDraft] = useLocalStorageState("embeddable-chat-draft", {
     defaultValue: "",
   });
 
   const { libp2p } = useLibp2p();
+
+  const handleSend = useCallback(
+    async (content: string) => {
+      const message: Message = { from: as, content, timestamp: Date.now() };
+      const value = encode(message);
+      const key = blake3(value, { dkLen: 16 });
+      try {
+        await libp2p.services[CHAT_TOPIC].insert(key, value);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [libp2p, as]
+  );
 
   return (
     <EmbeddableChatWrapper
@@ -26,9 +55,16 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
     >
       {/* contents go here */}
       <div className="relative h-full">
-        <div className="">Alice: hello world</div>
-        <div className="">Bob: hi alice</div>
-        <div className="">Bob: hi alice</div>
+        {messages &&
+          messages.map((message) => {
+            const { id } = message as Message & { id?: number };
+            return (
+              <div key={id} className="">
+                {message.content}
+              </div>
+            );
+          })}
+
         <div className="absolute bottom-0 w-full">
           <TextareaAutosize
             placeholder="New message"
@@ -41,9 +77,8 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
                 e.stopPropagation();
                 e.preventDefault();
                 // send
+                handleSend(draft);
                 setDraft("");
-                // libp2p.services[CHAT_TOPIC].insert()
-                // console.log({ draft });
               }
             }}
           />

@@ -119,6 +119,12 @@ importers:
       contracts:
         specifier: workspace:*
         version: link:../contracts
+      dexie:
+        specifier: ^3.2.3
+        version: 3.2.3
+      dexie-react-hooks:
+        specifier: ^1.1.3
+        version: 1.1.3(@types/react@18.0.11)(dexie@3.2.3)(react@18.2.0)
       ethers:
         specifier: ^5.7.2
         version: 5.7.2
@@ -128,6 +134,9 @@ importers:
       libp2p:
         specifier: ^0.45.3
         version: 0.45.3
+      microcbor:
+        specifier: ^0.2.1
+        version: 0.2.1
       multiformats:
         specifier: ^11.0.2
         version: 11.0.2
@@ -143,6 +152,9 @@ importers:
       tailwind-merge:
         specifier: ^1.11.0
         version: 1.12.0
+      uint8arrays:
+        specifier: ^4.0.3
+        version: 4.0.3
       use-local-storage-state:
         specifier: ^18.3.3
         version: 18.3.3(react-dom@18.2.0)(react@18.2.0)
@@ -2390,7 +2402,6 @@ packages:
 
   /@types/prop-types@15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
-    dev: true
 
   /@types/react-dom@18.0.11:
     resolution: {integrity: sha512-O38bPbI2CWtgw/OoQoY+BRelw7uysmXbWvw3nLWO21H1HSh+GOlqPuXshJfjmpNlKiiSDG9cc1JZAaMmVdcTlw==}
@@ -2404,7 +2415,6 @@ packages:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.3
       csstype: 3.1.2
-    dev: true
 
   /@types/retry@0.12.1:
     resolution: {integrity: sha512-xoDlM2S4ortawSWORYqsdU+2rxdh4LRW9ytc3zmT37RIKQh6IHyKwwtKhKis9ah8ol07DCkZxPt8BBvPjC6v4g==}
@@ -2412,7 +2422,6 @@ packages:
 
   /@types/scheduler@0.16.3:
     resolution: {integrity: sha512-5cJ8CB4yAx7BH1oMvdU0Jh9lrEXyPkar6F9G/ERswkCuvP4KQZfZkSjcMbAICCpQTN4OuZn8tz0HiKv9TGZgrQ==}
-    dev: true
 
   /@types/semver@7.5.0:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
@@ -3286,7 +3295,6 @@ packages:
 
   /csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
-    dev: true
 
   /cycle@1.0.3:
     resolution: {integrity: sha512-TVF6svNzeQCOpjCqsy0/CSy8VgObG3wXusJ73xW2GbG5rGx7lC8zxDSURicsXI2UsGdi2L0QNRCi745/wUDvsA==}
@@ -3377,6 +3385,23 @@ packages:
   /detect-libc@2.0.1:
     resolution: {integrity: sha512-463v3ZeIrcWtdgIg6vI6XUncguvr2TnGl4SzDXinkt9mSLpBJKXT3mW6xT3VQdDN11+WVs29pgvivTc4Lp8v+w==}
     engines: {node: '>=8'}
+    dev: false
+
+  /dexie-react-hooks@1.1.3(@types/react@18.0.11)(dexie@3.2.3)(react@18.2.0):
+    resolution: {integrity: sha512-bXXE1gfYtfuVYTNiOlyam+YVaO8KaqacgRuxFuP37YtpS6o/jxT6KOl5h+hhqY36s0UavlHWbL+HWJFMcQumIg==}
+    peerDependencies:
+      '@types/react': '>=16'
+      dexie: '>=3.1.0-alpha.1 <5.0.0'
+      react: '>=16'
+    dependencies:
+      '@types/react': 18.0.11
+      dexie: 3.2.3
+      react: 18.2.0
+    dev: false
+
+  /dexie@3.2.3:
+    resolution: {integrity: sha512-iHayBd4UYryDCVUNa3PMsJMEnd8yjyh5p7a+RFeC8i8n476BC9wMhVvqiImq5zJZJf5Tuer+s4SSj+AA3x+ZbQ==}
+    engines: {node: '>=6.0'}
     dev: false
 
   /didyoumean@1.2.2:
@@ -4063,6 +4088,10 @@ packages:
       async: 0.2.10
       combined-stream: 0.0.7
       mime: 1.2.11
+    dev: false
+
+  /fp16@0.2.0:
+    resolution: {integrity: sha512-rP3kzmANkEOeg99U3b8d9UGkAJV9MUse/2oooxqMwLYjqSe0ZmrqnrCzI3WGobkxTOw4eVQUz0hH9iRkP3WBKg==}
     dev: false
 
   /fraction.js@4.2.0:
@@ -5144,6 +5173,12 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
     dev: true
+
+  /microcbor@0.2.1:
+    resolution: {integrity: sha512-CdVF2APl2GGgWEXrGUbEt24blu3FvzxnccNA3pR9L0yaifFi8y6WfkZewGG6nyrWIrEB6W7ldFmrD2Fz967hkQ==}
+    dependencies:
+      fp16: 0.2.0
+    dev: false
 
   /micromatch@4.0.5:
     resolution: {integrity: sha512-DMy+ERcEW2q8Z2Po+WNXuw3c5YaUSFjAO5GsJqfEl7UjvtIuFKO6ZrKvcItdy98dwFI2N1tg3zNIdKaQT+aNdA==}

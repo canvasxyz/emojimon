@@ -1,6 +1,22 @@
 import { openDB } from "idb";
+import Dexie, { Table } from "dexie";
 
 import { CHAT_TOPIC } from "./constants";
+
+export type Message = { from: string; content: string; timestamp: number };
+
+export class ModelDB extends Dexie {
+  messages!: Table<Message, string>;
+
+  constructor() {
+    super("ModelDB");
+    this.version(1).stores({
+      messages: "++id, from, timestamp",
+    });
+  }
+}
+
+export const modelDB = new ModelDB();
 
 export const storeDB = await openDB("canvas:emojimon", 1, {
   upgrade(database, oldVersion, newVersion, transaction, event) {

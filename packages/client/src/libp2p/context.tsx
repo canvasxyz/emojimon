@@ -1,9 +1,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 
 import { Libp2p } from "libp2p";
-import { PeerId } from "@libp2p/interface-peer-id";
 import { Connection } from "@libp2p/interface-connection";
-import { identifyService } from "libp2p/identify";
 
 import { libp2p, ServiceMap } from "./libp2p.js";
 
@@ -39,7 +37,7 @@ export const Libp2pProvider: React.FC<{ children: React.ReactNode }> = (
       detail: { id, remotePeer, remoteAddr },
     }: CustomEvent<Connection>) => {
       console.log(
-        `opened connection ${identifyService} to ${remotePeer.toString()} at ${remoteAddr.toString()}`
+        `opened connection ${id} to ${remotePeer.toString()} at ${remoteAddr.toString()}`
       );
 
       const connections = libp2p.getConnections();
@@ -50,7 +48,7 @@ export const Libp2pProvider: React.FC<{ children: React.ReactNode }> = (
       detail: { id, remotePeer, remoteAddr },
     }: CustomEvent<Connection>) => {
       console.log(
-        `closed connection ${identifyService} to ${remotePeer.toString()} at ${remoteAddr.toString()}`
+        `closed connection ${id} to ${remotePeer.toString()} at ${remoteAddr.toString()}`
       );
 
       const connections = libp2p.getConnections();
