@@ -31,8 +31,8 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
     defaultValue: "",
   });
 
-  const [sending, setSending] = useState();
-  const scrollElementRef = useRef();
+  const [sending, setSending] = useState<boolean>();
+  const scrollElementRef = useRef<HTMLDivElement>();
 
   const { connectionCount, libp2p } = useLibp2p();
 
@@ -44,6 +44,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
   }, []);
 
   useEffect(() => {
+    if (!scrollElementRef.current) return
     scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
   }, [messages && messages.length !== 0]);
 
@@ -52,11 +53,12 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
       if (!signer) return;
       setDraft("");
 
+      const timestamp = Date.now()
       const message: Message = {
         from: as,
         content,
-        timestamp: Date.now(),
-        signature: signer.personalSign(encode({ content, timestamp })),
+        timestamp,
+        signature: await signer.signMessage(encode({ from: as, content, timestamp })),
       };
       const value = encode(message);
       const key = blake3(value, { dkLen: 16 });
@@ -83,7 +85,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
               const { id } = message as Message & { id?: number };
               return (
                 <div key={id} className="">
-                  {message.content}
+                  {message.from.slice(0, 4)}: {message.content}
                 </div>
               );
             })}
@@ -98,7 +100,9 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
             defaultValue={draft}
             // @ts-expect-error
             onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key !== "Escape") e.stopPropagation();
+            }}
             onKeyPress={(e) => {
               e.stopPropagation();
               if (e.key === "Enter" && !e.shiftKey) {
@@ -108,8 +112,9 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
                   .then(() => {
                     e.target.value = "";
                   })
-                  .finally((err) => {
+                  .finally(() => {
                     setSending(false);
+                    if (!scrollElementRef.current) return
                     scrollElementRef.current.scrollTop =
                       scrollElementRef.current.scrollHeight;
                   });

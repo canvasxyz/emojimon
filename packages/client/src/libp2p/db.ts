@@ -3,7 +3,7 @@ import Dexie, { Table } from "dexie";
 
 import { CHAT_TOPIC } from "./constants";
 
-export type Message = { from: string; content: string; timestamp: number };
+export type Message = { from: string; content: string; timestamp: number, signature: string };
 
 export class ModelDB extends Dexie {
   messages!: Table<Message, string>;
