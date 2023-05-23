@@ -22,7 +22,7 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
 }) => {
   const players: string[] = useEntityQuery(withEntityQuery);
   const messages = useLiveQuery(
-    () => modelDB.messages.limit(100).sortBy("timestamp"),
+    () => modelDB.messages.orderBy("timestamp").limit(100).sortBy("timestamp"),
     []
   );
 
