@@ -45,8 +45,8 @@ importers:
         specifier: ^0.0.2
         version: 0.0.2(idb@7.1.1)
       '@canvas-js/pubsub-service-discovery':
-        specifier: ^0.0.9
-        version: 0.0.9(@chainsafe/libp2p-gossipsub@8.0.0)
+        specifier: ^0.0.10
+        version: 0.0.10(@chainsafe/libp2p-gossipsub@8.0.0)
       '@chainsafe/libp2p-gossipsub':
         specifier: github:joeltg/js-libp2p-gossipsub#patch-1
         version: github.com/joeltg/js-libp2p-gossipsub/254299f67e36124b6bb5d5ce5039d05ca3619739
@@ -594,8 +594,8 @@ packages:
       - supports-color
     dev: false
 
-  /@canvas-js/pubsub-service-discovery@0.0.9(@chainsafe/libp2p-gossipsub@8.0.0):
-    resolution: {integrity: sha512-UxAxsVoOL5/tpG96DhWtS2lTKVqYFKnYvknuthWBhOEvEWKhMDbBPnmhtCfwE4DBNTwxNCTTy+P4FtAF7qIjkA==}
+  /@canvas-js/pubsub-service-discovery@0.0.10(@chainsafe/libp2p-gossipsub@8.0.0):
+    resolution: {integrity: sha512-08m20FMIRtk+CWXuC/qg6iqF/6PZG60XKhwhgMMJgCuRUyin0QcM4QNKzeeVp4gRi070z7gvXsRqza8I7J63MQ==}
     peerDependencies:
       '@chainsafe/libp2p-gossipsub': ^8.0.0
     dependencies:
