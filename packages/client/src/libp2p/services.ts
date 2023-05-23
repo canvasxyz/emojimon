@@ -64,7 +64,7 @@ export async function getChatService(): Promise<
           "invalid event: missing message.timestamp"
         );
 
-        modelDB.messages.add(message);
+        await modelDB.messages.add(message);
       } else if (event.type === "update") {
         const update = event.detail;
         assert(
@@ -72,7 +72,7 @@ export async function getChatService(): Promise<
           "event signed by wrong address"
         );
 
-        modelDB.names.put(update);
+        await modelDB.names.put(update);
       } else {
         throw new Error("invalid event type");
       }
