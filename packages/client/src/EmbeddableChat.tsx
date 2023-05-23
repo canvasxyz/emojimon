@@ -28,11 +28,9 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
             ref={newMessageInputRef}
             placeholder="New message"
             className="mt-2 bg-gray-700 w-full outline-none border-none resize-none px-2 py-1 rounded max-h-16"
-            onKeyDown={(e) => {
-              if (e.key !== "Escape") e.stopPropagation();
-            }}
             defaultValue={draft}
             onKeyDown={(e) => {
+              if (e.key !== "Escape") e.stopPropagation();
               // catch non-printing characters like backspace
               setDraft(newMessageInputRef.current.value);
             }}
