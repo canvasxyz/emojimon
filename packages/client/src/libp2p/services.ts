@@ -4,6 +4,8 @@ import { IDBTree } from "@canvas-js/okra-idb";
 import { equals } from "multiformats/bytes";
 import { encode, decode } from "microcbor";
 
+import { ethers } from "ethers";
+
 import {
   storeService,
   StoreService,
@@ -22,7 +24,7 @@ export async function getChatService(): Promise<
     topic: CHAT_TOPIC,
     apply: async (key, value) => {
       assert(equals(blake3(value, { dkLen: 16 }), key), "invalid entry");
-      const { from, content, timestamp } = decode(value) as Message;
+      const { from, content, timestamp, signature } = decode(value) as Message;
       assert(typeof from === "string", "invalid entry: missing message.from");
       assert(
         typeof content === "string",
@@ -32,6 +34,14 @@ export async function getChatService(): Promise<
         typeof timestamp === "number",
         "invalid entry: missing message.timestamp"
       );
+      assert(
+        typeof signature === "string",
+        "invalid entry: missing message.signature"
+      );
+
+      const valid = true;
+      console.log(signature);
+      assert(valid, "invalid signature");
 
       modelDB.messages.add({ from, content, timestamp });
       console.log(`${CHAT_TOPIC}: got entry`, {

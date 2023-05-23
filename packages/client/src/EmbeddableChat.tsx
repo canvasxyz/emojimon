@@ -43,11 +43,21 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
     setSigner(new ethers.Wallet(mudBurnerWallet));
   }, []);
 
+  useEffect(() => {
+    scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
+  }, [messages && messages.length !== 0]);
+
   const handleSend = useCallback(
     async (content: string) => {
+      if (!signer) return;
       setDraft("");
 
-      const message: Message = { from: as, content, timestamp: Date.now() };
+      const message: Message = {
+        from: as,
+        content,
+        timestamp: Date.now(),
+        signature: signer.personalSign(encode({ content, timestamp })),
+      };
       const value = encode(message);
       const key = blake3(value, { dkLen: 16 });
 
@@ -88,9 +98,10 @@ export const EmbeddableChat: React.FC<EmbeddableChatProps> = ({
             defaultValue={draft}
             // @ts-expect-error
             onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
             onKeyPress={(e) => {
+              e.stopPropagation();
               if (e.key === "Enter" && !e.shiftKey) {
-                e.stopPropagation();
                 e.preventDefault();
                 setSending(true);
                 handleSend(draft)
